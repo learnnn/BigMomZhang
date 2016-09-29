@@ -1,0 +1,25 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+
+    <!-- 列表子项主题文字样式 -->
+    <style name="my_listview_item_theme_text_style" parent="@android:style/Widget.TextView">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">@dimen/text_fontsize_normal</item>
+    </style>
+
+    <!-- 列表子项内容文字样式 -->
+    <style name="my_listview_item_detail_text_style" parent="@android:style/Widget.TextView">
+        <item name="android:textColor">@color/text_second</item>
+        <item name="android:textColorHint">@color/hint</item>
+        <item name="android:textSize">@dimen/text_fontsize_small</item>
+    </style>
+
+</resources>
