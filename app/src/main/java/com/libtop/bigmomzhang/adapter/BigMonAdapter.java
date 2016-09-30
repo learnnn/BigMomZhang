@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.libtop.bigmomzhang.ImageLoadUtil;
@@ -44,30 +45,34 @@ public class BigMonAdapter extends RecyclerView.Adapter<BigMonAdapter.ViewHolder
 
 
     @Override
-    public BigMonAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_bigmon, parent, false);
-        v.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                if (onRVItemClickListener!=null){
-                    onRVItemClickListener.onClick(v,(RowsBean) v.getTag());
-                }
-            }
-        });
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_search_result, parent, false);
         return new ViewHolder(v);
     }
 
 
     @Override
-    public void onBindViewHolder(BigMonAdapter.ViewHolder holder, int position)
+    public void onBindViewHolder(ViewHolder holder, int position)
     {
         RowsBean rowsBean = lists.get(position);
-        holder.tvItemTitle.setText(rowsBean.article_title);
-        ImageLoadUtil.LoadImage(context,rowsBean.article_pic,holder.imgItemPhoto);
+        holder.tvPrice.setText(rowsBean.getArticle_price());
+        holder.tvComment.setText(rowsBean.getArticle_comment());
+        holder.tvTime.setText(rowsBean.getArticle_format_date());
+        holder.tvMall.setText(rowsBean.getArticle_mall()+" | ");
+        holder.tvTag.setText(rowsBean.getArticle_channel_name());
+        holder.tvTitle.setText(rowsBean.getArticle_title());
+        int worthy = rowsBean.getArticle_worthy();
+        int unWorthy = rowsBean.getArticle_unworthy();
+        int all = worthy + unWorthy;
+        if (all>0){
+            holder.tvZhi.setText((int) ((worthy/(float)all)*100)+"%");
+        }else {
+            holder.tvZhi.setText(100+"%");
+        }
+        ImageLoadUtil.LoadImage(context, rowsBean.getArticle_pic(), holder.ivPic);
     }
+
 
     @Override
     public int getItemCount()
@@ -81,37 +86,62 @@ public class BigMonAdapter extends RecyclerView.Adapter<BigMonAdapter.ViewHolder
         this.onBigMonClickListener = onBigMonClickListener;
     }
 
+
     public void setOnRVItemClickListener(OnRVItemClickListener onRVItemClickListener)
     {
         this.onRVItemClickListener = onRVItemClickListener;
     }
 
+
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
 
-        @Bind(R.id.img_item_photo)
-        ImageView imgItemPhoto;
-        @Bind(R.id.tv_item_title)
-        TextView tvItemTitle;
-        @Bind(R.id.ll_item_container)
-        LinearLayout llItemContainer;
+        @Bind(R.id.iv_pic)
+        ImageView ivPic;
+        @Bind(R.id.tv_tag)
+        TextView tvTag;
+        @Bind(R.id.tv_title)
+        TextView tvTitle;
+        @Bind(R.id.tv_price)
+        TextView tvPrice;
+        @Bind(R.id.ly_titleprice)
+        LinearLayout lyTitleprice;
+        @Bind(R.id.tv_mall)
+        TextView tvMall;
+        @Bind(R.id.tv_time)
+        TextView tvTime;
+        @Bind(R.id.rl_mall_time)
+        RelativeLayout rlMallTime;
+        @Bind(R.id.tv_comment)
+        TextView tvComment;
+        @Bind(R.id.tv_zhi)
+        TextView tvZhi;
+        @Bind(R.id.rl_comment_zhi)
+        LinearLayout rlCommentZhi;
+        @Bind(R.id.rl_bottom_show)
+        RelativeLayout rlBottomShow;
 
 
         public ViewHolder(View itemView)
         {
             super(itemView);
             ButterKnife.bind(this, itemView);
-            imgItemPhoto.setOnClickListener(this);
-            tvItemTitle.setOnClickListener(this);
-            llItemContainer.setOnClickListener(this);
+            itemView.setOnClickListener(this);
+//            ivPic.setOnClickListener(this);
+//            tvTitle.setOnClickListener(this);
+//            llItemContainer.setOnClickListener(this);
         }
 
 
         @Override
         public void onClick(View v)
         {
-            if (onBigMonClickListener!=null){
-                onBigMonClickListener.onClick(v,lists.get(getAdapterPosition()));
+            if (onRVItemClickListener!=null){
+                onRVItemClickListener.onClick(v, lists.get(getAdapterPosition()));
+            }
+            if (onBigMonClickListener != null)
+            {
+                onBigMonClickListener.onClick(v, lists.get(getAdapterPosition()));
             }
         }
     }

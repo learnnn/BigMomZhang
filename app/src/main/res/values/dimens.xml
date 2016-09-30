@@ -7,4 +7,10 @@
     <dimen name="text_fontsize_small">12sp</dimen>
     <dimen name="text_fontsize_normal">14sp</dimen>
     <dimen name="padding_normal">6dp</dimen>
+
+    <dimen name="tag_text_size">11.0dip</dimen>
+    <dimen name="tag_min_width">38.0dip</dimen>
+    <dimen name="haojia_list_item_height">125.0dip</dimen>
+    <dimen name="haojia_list_image_width">115.0dip</dimen>
+
 </resources>

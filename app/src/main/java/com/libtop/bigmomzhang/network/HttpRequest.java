@@ -1,5 +1,8 @@
 package com.libtop.bigmomzhang.network;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -20,7 +23,8 @@ public class HttpRequest
 
     private static BigMonApi bigMonApi;
     private static OkHttpClient okHttpClient;
-    private static Converter.Factory gsonConverterFactory = GsonConverterFactory.create();
+    final static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").serializeNulls().create();
+    private static Converter.Factory gsonConverterFactory = GsonConverterFactory.create(gson);
     private static CallAdapter.Factory rxJavaCallAdapterFactory = RxJavaCallAdapterFactory.create();
 
 
@@ -28,6 +32,8 @@ public class HttpRequest
     {
         if (bigMonApi == null)
         {
+            int cacheSize = 100 * 1024 * 1024;
+//            Cache cache = new Cache(App.getInstance().getCacheDir(), cacheSize);
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
             logging.setLevel(HttpLoggingInterceptor.Level.BODY);
             okHttpClient = new OkHttpClient.Builder().readTimeout(15, TimeUnit.SECONDS).connectTimeout(15, TimeUnit.SECONDS).addInterceptor(logging).build();

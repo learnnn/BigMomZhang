@@ -1,3 +1,40 @@
 <resources>
     <string name="app_name">BigMomZhang</string>
+
+    <string name="mall">商城</string>
+    <string name="mall0">京东</string>
+    <string name="mall1">天猫</string>
+    <string name="mall10">当当网</string>
+    <string name="mall11">优购网</string>
+    <string name="mall12">沱沱公社</string>
+    <string name="mall13">健一网</string>
+    <string name="mall14">新蛋中国</string>
+    <string name="mall2">亚马逊中国</string>
+    <string name="mall3">苏宁易购</string>
+    <string name="mall4">1号店</string>
+    <string name="mall5">顺丰优选</string>
+    <string name="mall6">中粮我买网</string>
+    <string name="mall7">淘宝网</string>
+    <string name="mall8">易迅</string>
+    <string name="mall9">国美在线</string>
+    <string name="mall_collapse">点击收起</string>
+    <string name="mall_cross_border">跨境商城</string>
+    <string name="mall_inland">国内商城</string>
+    <string name="mall_more">查看更多国内商城</string>
+    <string name="mall_overseas">海外商城</string>
+    <string name="mall_overseas0">美国亚马逊</string>
+    <string name="mall_overseas1">日本亚马逊</string>
+    <string name="mall_overseas10">drugstore</string>
+    <string name="mall_overseas11">"Joe's NB Outlet"</string>
+    <string name="mall_overseas12">德国亚马逊</string>
+    <string name="mall_overseas13">JOMASHOP</string>
+    <string name="mall_overseas14">TheWatchery</string>
+    <string name="mall_overseas2">eBay</string>
+    <string name="mall_overseas3">6pm</string>
+    <string name="mall_overseas4">STP</string>
+    <string name="mall_overseas5">Ashford</string>
+    <string name="mall_overseas6">woot</string>
+    <string name="mall_overseas7">GNC美国官网</string>
+    <string name="mall_overseas8">MYHABIT</string>
+    <string name="mall_overseas9">REI</string>
 </resources>

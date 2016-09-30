@@ -10,4 +10,15 @@
     <color name="text_second">#FF999999</color>
 
     <color name="hint">#FFC0C0C0</color>
+
+    <color name="list_pressed_color_trans">#1a000000</color>
+
+    <color name="white">#ffffffff</color>
+    <color name="transparent_white_v7">#e5ffffff</color>
+    <color name="color333">#ff333333</color>
+    <color name="coloreee">#ffeeeeee</color>
+    <color name="color666">#ff666666</color>
+    <color name="color888">#ff888888</color>
+
+    <color name="red">#ffcc3300</color>
 </resources>

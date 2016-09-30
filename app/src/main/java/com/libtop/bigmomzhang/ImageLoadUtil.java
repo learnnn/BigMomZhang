@@ -14,6 +14,6 @@ public class ImageLoadUtil
 {
 
     public static void LoadImage(Context context, String url, ImageView imageView){
-        Picasso.with(context).load(url).placeholder(R.mipmap.ic_launcher).error(R.mipmap.ic_launcher).fit().into(imageView);
+        Picasso.with(context).load(url).placeholder(R.mipmap.ic_launcher).error(R.mipmap.ic_launcher).centerInside().fit().into(imageView);
     }
 }
