@@ -1,8 +1,8 @@
-package com.libtop.bigmonzhang.func;
+package com.libtop.bigmomzhang.func;
 
 import android.view.View;
 
-import com.libtop.bigmonzhang.bean.RowsBean;
+import com.libtop.bigmomzhang.bean.RowsBean;
 
 
 /**

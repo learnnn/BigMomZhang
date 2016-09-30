@@ -1,4 +1,4 @@
-package com.libtop.bigmonzhang.bean;
+package com.libtop.bigmomzhang.bean;
 
 import java.util.List;
 

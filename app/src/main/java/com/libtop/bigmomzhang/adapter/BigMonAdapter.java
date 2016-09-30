@@ -1,4 +1,4 @@
-package com.libtop.bigmonzhang.adapter;
+package com.libtop.bigmomzhang.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -9,11 +9,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.libtop.bigmonzhang.ImageLoadUtil;
-import com.libtop.bigmonzhang.R;
-import com.libtop.bigmonzhang.bean.RowsBean;
-import com.libtop.bigmonzhang.func.OnBigMonClickListener;
-import com.libtop.bigmonzhang.func.OnRVItemClickListener;
+import com.libtop.bigmomzhang.ImageLoadUtil;
+import com.libtop.bigmomzhang.R;
+import com.libtop.bigmomzhang.bean.RowsBean;
+import com.libtop.bigmomzhang.func.OnBigMonClickListener;
+import com.libtop.bigmomzhang.func.OnRVItemClickListener;
 
 import java.util.List;
 

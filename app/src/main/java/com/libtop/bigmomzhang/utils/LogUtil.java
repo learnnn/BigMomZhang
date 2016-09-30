@@ -1,8 +1,8 @@
-package com.libtop.bigmonzhang.utils;
+package com.libtop.bigmomzhang.utils;
 
 import android.util.Log;
 
-import com.libtop.bigmonzhang.BuildConfig;
+import com.libtop.bigmomzhang.BuildConfig;
 
 
 /**

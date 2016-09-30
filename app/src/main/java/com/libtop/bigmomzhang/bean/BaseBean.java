@@ -1,4 +1,4 @@
-package com.libtop.bigmonzhang.bean;
+package com.libtop.bigmomzhang.bean;
 
 /**
  * Created by LianTu on 2016-9-29.

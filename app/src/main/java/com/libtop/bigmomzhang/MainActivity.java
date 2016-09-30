@@ -1,4 +1,4 @@
-package com.libtop.bigmonzhang;
+package com.libtop.bigmomzhang;
 
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -8,13 +8,13 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.libtop.bigmonzhang.adapter.BigMonAdapter;
-import com.libtop.bigmonzhang.bean.RowsBean;
-import com.libtop.bigmonzhang.bean.SearchBean;
-import com.libtop.bigmonzhang.func.OnBigMonClickListener;
-import com.libtop.bigmonzhang.func.OnRVItemClickListener;
-import com.libtop.bigmonzhang.network.HttpRequest;
-import com.libtop.bigmonzhang.utils.LogUtil;
+import com.libtop.bigmomzhang.adapter.BigMonAdapter;
+import com.libtop.bigmomzhang.bean.RowsBean;
+import com.libtop.bigmomzhang.bean.SearchBean;
+import com.libtop.bigmomzhang.func.OnBigMonClickListener;
+import com.libtop.bigmomzhang.func.OnRVItemClickListener;
+import com.libtop.bigmomzhang.network.HttpRequest;
+import com.libtop.bigmomzhang.utils.LogUtil;
 
 import java.util.ArrayList;
 import java.util.List;

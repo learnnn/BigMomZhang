@@ -1,6 +1,6 @@
-package com.libtop.bigmonzhang.network;
+package com.libtop.bigmomzhang.network;
 
-import com.libtop.bigmonzhang.bean.SearchBean;
+import com.libtop.bigmomzhang.bean.SearchBean;
 
 import retrofit2.http.GET;
 import rx.Observable;
