@@ -5,8 +5,11 @@ import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.libtop.bigmomzhang.adapter.BigMonAdapter;
@@ -17,6 +20,7 @@ import com.libtop.bigmomzhang.func.OnRVItemClickListener;
 import com.libtop.bigmomzhang.network.HttpRequest;
 import com.libtop.bigmomzhang.utils.LogUtil;
 import com.libtop.bigmomzhang.utils.MapUtil;
+import com.miguelcatalan.materialsearchview.MaterialSearchView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,13 +42,19 @@ public class MainActivity extends BaseActivity
 {
 
     @Bind(R.id.activity_main)
-    RelativeLayout activityMain;
+    LinearLayout activityMain;
     @Bind(R.id.rcv_search_list)
     RecyclerView rcvSearchList;
     @Bind(R.id.swipeRefreshLayout)
     SwipeRefreshLayout swipeRefreshLayout;
+    @Bind(R.id.toolbar)
+    Toolbar toolbar;
+    @Bind(R.id.search_view)
+    MaterialSearchView searchView;
+
 
     private BigMonAdapter bigMonAdapter;
+
 
     private List<RowsBean> lists = new ArrayList<>();
 
@@ -53,6 +63,7 @@ public class MainActivity extends BaseActivity
     private int mPage = 1;
     //加载下一页的个数
     private int offset = 0;
+    private String keyword = "";
 
 
     @Override
@@ -88,9 +99,49 @@ public class MainActivity extends BaseActivity
         bigMonAdapter.setOnBigMonClickListener(onBigMonClickListener);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_search, menu);
+
+        MenuItem item = menu.findItem(R.id.action_search);
+        searchView.setMenuItem(item);
+
+        return true;
+    }
 
     private void initView()
     {
+        setSupportActionBar(toolbar);
+        searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                //Do some magic
+                keyword = query;
+                requestData(true);
+                toolbar.setTitle(query);
+                LogUtil.w(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                //Do some magic
+                return false;
+            }
+        });
+        searchView.setVoiceSearch(false);
+
+        searchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
+            @Override
+            public void onSearchViewShown() {
+                //Do some magic
+            }
+
+            @Override
+            public void onSearchViewClosed() {
+                //Do some magic
+            }
+        });
         swipeRefreshLayout.setColorSchemeColors(Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
         {
@@ -113,7 +164,7 @@ public class MainActivity extends BaseActivity
         }
         swipeRefreshLayout.setRefreshing(true);
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("keyword", "手机");
+        params.put("keyword", keyword);
         params.put("type", "home");
         params.put("category_id", "");
         params.put("brand_id", "");
