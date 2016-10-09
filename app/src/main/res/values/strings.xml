@@ -37,4 +37,7 @@
     <string name="mall_overseas7">GNC美国官网</string>
     <string name="mall_overseas8">MYHABIT</string>
     <string name="mall_overseas9">REI</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
 </resources>

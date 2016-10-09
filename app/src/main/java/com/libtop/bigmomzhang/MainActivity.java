@@ -2,68 +2,52 @@ package com.libtop.bigmomzhang;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.libtop.bigmomzhang.adapter.BigMonAdapter;
-import com.libtop.bigmomzhang.bean.RowsBean;
-import com.libtop.bigmomzhang.bean.SearchBean;
-import com.libtop.bigmomzhang.func.OnBigMonClickListener;
-import com.libtop.bigmomzhang.func.OnRVItemClickListener;
-import com.libtop.bigmomzhang.network.HttpRequest;
+import com.flyco.tablayout.SlidingTabLayout;
+import com.libtop.bigmomzhang.adapter.SlideViewPagerAdapter;
 import com.libtop.bigmomzhang.utils.LogUtil;
-import com.libtop.bigmomzhang.utils.MapUtil;
 import com.miguelcatalan.materialsearchview.MaterialSearchView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
-import rx.Observable;
-import rx.Observer;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 
 
-public class MainActivity extends BaseActivity
+public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener
 {
 
     @Bind(R.id.activity_main)
     LinearLayout activityMain;
-    @Bind(R.id.rcv_search_list)
-    RecyclerView rcvSearchList;
-    @Bind(R.id.swipeRefreshLayout)
-    SwipeRefreshLayout swipeRefreshLayout;
     @Bind(R.id.toolbar)
     Toolbar toolbar;
     @Bind(R.id.search_view)
     MaterialSearchView searchView;
+    @Bind(R.id.tablayout)
+    SlidingTabLayout tablayout;
+    @Bind(R.id.viewpager)
+    ViewPager mPager;
 
 
-    private BigMonAdapter bigMonAdapter;
+    private long mLastBackPress = 0;
 
+        private final String[] mTitles = {
+               "", "笔记本","游戏本","超级本","电磁炉","电视架","电视", "手机"
+        };
+        private ArrayList<Fragment> mFragments = new ArrayList<>();
 
-    private List<RowsBean> lists = new ArrayList<>();
-
-    private final int ONE_PAGE_SIZE = 20;
-    private final int PRELOAD_SIZE = 4;
-    private int mPage = 1;
-    //加载下一页的个数
-    private int offset = 0;
-    private String keyword = "";
+    private SlideViewPagerAdapter mAdapter;
 
 
     @Override
@@ -73,34 +57,14 @@ public class MainActivity extends BaseActivity
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         initView();
-        initRecyclerView();
-        requestData(true);
 
     }
 
 
-    private void initRecyclerView()
-    {
-        final LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false);
-        rcvSearchList.setLayoutManager(layoutManager);
-        bigMonAdapter = new BigMonAdapter(MainActivity.this, lists);
-        rcvSearchList.setAdapter(bigMonAdapter);
-        rcvSearchList.addOnScrollListener(getOnBottomListener(layoutManager));
-        bigMonAdapter.setOnRVItemClickListener(new OnRVItemClickListener()
-        {
-            @Override
-            public void onClick(View v, RowsBean rowsBean)
-            {
-                LogUtil.w(rowsBean.getArticle_title());
-                LogUtil.w(rowsBean.getArticle_worthy()+"");
-                LogUtil.w(rowsBean.getArticle_unworthy()+"");
-            }
-        });
-        bigMonAdapter.setOnBigMonClickListener(onBigMonClickListener);
-    }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         getMenuInflater().inflate(R.menu.menu_search, menu);
 
         MenuItem item = menu.findItem(R.id.action_search);
@@ -109,164 +73,144 @@ public class MainActivity extends BaseActivity
         return true;
     }
 
+
     private void initView()
     {
+        mAdapter = new SlideViewPagerAdapter(getSupportFragmentManager(),mTitles);
+        mPager.setAdapter(mAdapter);
         setSupportActionBar(toolbar);
-        searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+        toolbar.setTitleTextColor(Color.WHITE);
+        tablayout.setViewPager(mPager, mTitles);
+
+        searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener()
+        {
             @Override
-            public boolean onQueryTextSubmit(String query) {
+            public boolean onQueryTextSubmit(String query)
+            {
                 //Do some magic
-                keyword = query;
-                requestData(true);
+//                keyword = query;
+//                requestData(true);
+                mAdapter.addTag(query);
+                tablayout.addNewTab(query);
                 toolbar.setTitle(query);
+                mPager.setCurrentItem(0);
                 LogUtil.w(query);
                 return false;
             }
 
+
             @Override
-            public boolean onQueryTextChange(String newText) {
+            public boolean onQueryTextChange(String newText)
+            {
                 //Do some magic
                 return false;
             }
         });
         searchView.setVoiceSearch(false);
 
-        searchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
+        searchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener()
+        {
             @Override
-            public void onSearchViewShown() {
+            public void onSearchViewShown()
+            {
                 //Do some magic
             }
 
+
             @Override
-            public void onSearchViewClosed() {
+            public void onSearchViewClosed()
+            {
                 //Do some magic
             }
         });
-        swipeRefreshLayout.setColorSchemeColors(Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START))
         {
-            @Override
-            public void onRefresh()
+            drawer.closeDrawer(GravityCompat.START);
+        }
+        else
+        {
+            long tempTime = System.currentTimeMillis();
+            if (tempTime - mLastBackPress < 2000)
             {
-                requestData(true);
+                super.onBackPressed();
             }
-        });
+            else
+            {
+                Toast.makeText(MainActivity.this, "再按一次，退出应用", Toast.LENGTH_SHORT).show();
+            }
+            mLastBackPress = tempTime;
+        }
 
     }
 
 
-    //    @GET("https://api.smzdm.com/v1/list?keyword=笔记本&type=home&category_id=&brand_id=&mall_id=&order=score&day=&limit=20&offset=0&f=android&s=A7IepH35JcdbNwexZRT0dAaTrg3RrElV&v=320&weixin=0")
-    private void requestData(final boolean clean)
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
     {
-        if (clean)
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings)
         {
-            offset = 0;
+            return true;
         }
-        swipeRefreshLayout.setRefreshing(true);
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("keyword", keyword);
-        params.put("type", "home");
-        params.put("category_id", "");
-        params.put("brand_id", "");
-        params.put("mall_id", "");
-        params.put("order", "score");
-        params.put("limit", ONE_PAGE_SIZE);
-        params.put("offset", offset);
-        params.put("f", "android");
-        params.put("s", "A7IepH35JcdbNwexZRT0dAaTrg3RrElV");
-        params.put("v", "320");
-        params.put("weixin", 0);
-        subscription = HttpRequest.getBigMonApi().getSearchList("v1", "list", MapUtil.mapObject2String(params)).concatMap(new Func1<SearchBean, Observable<List<RowsBean>>>()
-        {
-            @Override
-            public Observable<List<RowsBean>> call(SearchBean searchBean)
-            {
-                return Observable.just(searchBean.data.rows);
-            }
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).doAfterTerminate(new Action0()
-        {
-            @Override
-            public void call()
-            {
-                swipeRefreshLayout.setRefreshing(false);
-            }
-        }).subscribe(new Observer<List<RowsBean>>()
-        {
-            @Override
-            public void onCompleted()
-            {
 
-            }
-
-
-            @Override
-            public void onError(Throwable e)
-            {
-                LogUtil.e(e.toString());
-            }
-
-
-            @Override
-            public void onNext(List<RowsBean> rowsBeens)
-            {
-                if (clean)
-                {
-                    lists.clear();
-                }
-                lists.addAll(rowsBeens);
-                bigMonAdapter.notifyDataSetChanged();
-            }
-        });
+        return super.onOptionsItemSelected(item);
     }
 
 
-    private OnBigMonClickListener onBigMonClickListener = new OnBigMonClickListener()
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item)
     {
-        @Override
-        public void onClick(View v, RowsBean rowsBean)
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_camera)
         {
-            switch (v.getId())
-            {
-                case R.id.img_item_photo:
-                    LogUtil.w(rowsBean.getArticle_title());
-                    break;
-                case R.id.tv_item_title:
-                    LogUtil.w(rowsBean.getArticle_title());
-                    break;
-                case R.id.ll_item_container:
-                    break;
-            }
+            // Handle the camera action
         }
-    };
-
-
-    @OnClick({R.id.activity_main})
-    public void onClick(View view)
-    {
-        switch (view.getId())
+        else if (id == R.id.nav_gallery)
         {
-            case R.id.activity_main:
-                break;
+
         }
-    }
-
-
-    RecyclerView.OnScrollListener getOnBottomListener(final LinearLayoutManager layoutManager)
-    {
-        return new RecyclerView.OnScrollListener()
+        else if (id == R.id.nav_slideshow)
         {
-            @Override
-            public void onScrolled(RecyclerView rv, int dx, int dy)
-            {
-                boolean isBottom = layoutManager.findLastCompletelyVisibleItemPosition() >= bigMonAdapter.getItemCount() - PRELOAD_SIZE;
-                if (!swipeRefreshLayout.isRefreshing() && isBottom)
-                {
-                    Toast.makeText(MainActivity.this, "isBottom", Toast.LENGTH_SHORT).show();
-                    swipeRefreshLayout.setRefreshing(true);
-                    offset += ONE_PAGE_SIZE;
-                    requestData(false);
-                }
-            }
-        };
+
+        }
+        else if (id == R.id.nav_manage)
+        {
+
+        }
+        else if (id == R.id.nav_share)
+        {
+
+        }
+        else if (id == R.id.nav_send)
+        {
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 }
