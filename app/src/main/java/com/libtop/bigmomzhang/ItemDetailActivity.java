@@ -160,6 +160,7 @@ public class ItemDetailActivity extends BaseActivity
     {
         Toolbar toolbarDetail = (Toolbar) findViewById(R.id.toolbar_detail);
         toolbarDetail.setTitle("详情");
+        toolbarDetail.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
         setSupportActionBar(toolbarDetail);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);

@@ -10,7 +10,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.libtop.bigmomzhang.adapter.BigMonAdapter;
 import com.libtop.bigmomzhang.bean.RowsBean;
@@ -20,6 +19,7 @@ import com.libtop.bigmomzhang.func.OnRVItemClickListener;
 import com.libtop.bigmomzhang.network.HttpRequest;
 import com.libtop.bigmomzhang.utils.LogUtil;
 import com.libtop.bigmomzhang.utils.MapUtil;
+import com.libtop.bigmomzhang.utils.ShowHideOnScroll;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +34,7 @@ import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Func1;
+import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 
 
@@ -61,6 +62,7 @@ public class SearchResultFragment extends BaseFragment
     private String keyword = "";
 
     private boolean isFilter = true;
+    private boolean hasMore = true;
 
     public static SearchResultFragment getInstance(String title) {
         SearchResultFragment sf = new SearchResultFragment();
@@ -116,6 +118,7 @@ public class SearchResultFragment extends BaseFragment
         rcvSearchList.setLayoutManager(layoutManager);
         bigMonAdapter = new BigMonAdapter(getContext(), lists);
         rcvSearchList.setAdapter(bigMonAdapter);
+        rcvSearchList.setOnTouchListener(new ShowHideOnScroll(getActivity().findViewById(R.id.appbar)));
         rcvSearchList.addOnScrollListener(getOnBottomListener(layoutManager));
         bigMonAdapter.setOnRVItemClickListener(new OnRVItemClickListener()
         {
@@ -166,6 +169,8 @@ public class SearchResultFragment extends BaseFragment
             @Override
             public Observable<RowsBean> call(List<RowsBean> rowsBeen)
             {
+                if (rowsBeen.isEmpty())
+                    hasMore = false;
                 return Observable.from(rowsBeen);
             }
         }).filter(new Func1<RowsBean, Boolean>()
@@ -175,7 +180,7 @@ public class SearchResultFragment extends BaseFragment
             {
                 if (isFilter)
                 {
-                    return rowsBean.getArticle_worthy() / (float) (rowsBean.getArticle_worthy() + rowsBean.getArticle_unworthy()) > 0.8;
+                    return rowsBean.getWorthy() > 80;
                 }
                 else
                 {
@@ -183,58 +188,48 @@ public class SearchResultFragment extends BaseFragment
                 }
             }
         })
-//                .do
-//                .doOnRequest(new Action1<Long>()
-//                {
-//                    @Override
-//                    public void call(Long aLong)
-//                    {
-//                        if (clean)
-//                            lists.clear();
-//                    }
-//                })
-//                .doOnSubscribe(new Action0()
-//        {
-//            @Override
-//            public void call()
-//            {
-//                if (clean)
-//                {
-//                    lists.clear();
-//                }
-//            }
-//        })
-        .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).doAfterTerminate(new Action0()
-        {
-            @Override
-            public void call()
-            {
-                swipeRefreshLayout.setRefreshing(false);
-            }
-        }).subscribe(new Observer<RowsBean>()
-        {
-            @Override
-            public void onCompleted()
-            {
+                .toSortedList(new Func2<RowsBean, RowsBean, Integer>()
+                {
+                    @Override
+                    public Integer call(RowsBean rowsBean, RowsBean rowsBean2)
+                    {
+                        return rowsBean2.getWorthy() - rowsBean.getWorthy();
+                    }
+                })
+                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).doAfterTerminate(new Action0()
+                {
+                    @Override
+                    public void call()
+                    {
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
+                }).subscribe(new Observer<List<RowsBean>>()
+                {
+                    @Override
+                    public void onCompleted()
+                    {
 
-            }
+                    }
 
 
-            @Override
-            public void onError(Throwable e)
-            {
+                    @Override
+                    public void onError(Throwable e)
+                    {
 
-            }
+                    }
 
 
-            @Override
-            public void onNext(RowsBean rowsBean)
-            {
-                lists.add(rowsBean);
-                bigMonAdapter.notifyDataSetChanged();
-
-            }
-        });
+                    @Override
+                    public void onNext(List<RowsBean> rowsBeens)
+                    {
+                        if (clean){
+                            lists.clear();
+                            hasMore = true;
+                        }
+                        lists.addAll(rowsBeens);
+                        bigMonAdapter.notifyDataSetChanged();
+                    }
+                });
     }
 
 
@@ -276,9 +271,9 @@ public class SearchResultFragment extends BaseFragment
             public void onScrolled(RecyclerView rv, int dx, int dy)
             {
                 boolean isBottom = layoutManager.findLastCompletelyVisibleItemPosition() >= bigMonAdapter.getItemCount() - PRELOAD_SIZE;
-                if (!swipeRefreshLayout.isRefreshing() && isBottom)
+                if (!swipeRefreshLayout.isRefreshing() && isBottom && hasMore)
                 {
-                    Toast.makeText(getContext(), "isBottom", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(getContext(), "isBottom", Toast.LENGTH_SHORT).show();
                     swipeRefreshLayout.setRefreshing(true);
                     offset += ONE_PAGE_SIZE;
                     requestData(false);

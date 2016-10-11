@@ -30,6 +30,7 @@ public   class RowsBean
     private String article_is_sold_out;
     private String article_is_timeout;
     private String sync_home;
+    private int worthy;
     /**
      * link : http://www.smzdm.com/p/6465165
      * link_type : faxian
@@ -40,6 +41,16 @@ public   class RowsBean
      */
 
     private RedirectDataBean redirect_data;
+
+    public int getWorthy()
+    {
+        int all = getArticle_unworthy()+getArticle_unworthy();
+        if (all>0){
+            return (int) (getArticle_worthy() / (float) (getArticle_worthy() + getArticle_unworthy()) * 100);
+        }else {
+            return 0;
+        }
+    }
 
 
     public String getArticle_channel_id()
