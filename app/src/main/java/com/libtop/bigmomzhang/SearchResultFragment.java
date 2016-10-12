@@ -1,5 +1,6 @@
 package com.libtop.bigmomzhang;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -8,8 +9,10 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 
 import com.libtop.bigmomzhang.adapter.BigMonAdapter;
 import com.libtop.bigmomzhang.bean.RowsBean;
@@ -19,7 +22,6 @@ import com.libtop.bigmomzhang.func.OnRVItemClickListener;
 import com.libtop.bigmomzhang.network.HttpRequest;
 import com.libtop.bigmomzhang.utils.LogUtil;
 import com.libtop.bigmomzhang.utils.MapUtil;
-import com.libtop.bigmomzhang.utils.ShowHideOnScroll;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,6 +65,7 @@ public class SearchResultFragment extends BaseFragment
 
     private boolean isFilter = true;
     private boolean hasMore = true;
+    private InputMethodManager inputManager;
 
     public static SearchResultFragment getInstance(String title) {
         SearchResultFragment sf = new SearchResultFragment();
@@ -102,8 +105,10 @@ public class SearchResultFragment extends BaseFragment
             }
         });
         swipeRefreshLayout.measure(0,0);
+        inputManager =
+                (InputMethodManager) getContext().
+                        getSystemService(Context.INPUT_METHOD_SERVICE);
     }
-
 
     @Override
     public void onDestroyView()
@@ -118,7 +123,18 @@ public class SearchResultFragment extends BaseFragment
         rcvSearchList.setLayoutManager(layoutManager);
         bigMonAdapter = new BigMonAdapter(getContext(), lists);
         rcvSearchList.setAdapter(bigMonAdapter);
-        rcvSearchList.setOnTouchListener(new ShowHideOnScroll(getActivity().findViewById(R.id.appbar)));
+//        rcvSearchList.setOnTouchListener(new ShowHideOnScroll(getActivity().findViewById(R.id.appbar)));
+        rcvSearchList.setOnTouchListener(new View.OnTouchListener()
+        {
+            @Override
+            public boolean onTouch(View v, MotionEvent event)
+            {
+                if(inputManager.isActive()){
+                    inputManager.hideSoftInputFromWindow(v.getWindowToken(),0);
+                }
+                return false;
+            }
+        });
         rcvSearchList.addOnScrollListener(getOnBottomListener(layoutManager));
         bigMonAdapter.setOnRVItemClickListener(new OnRVItemClickListener()
         {
@@ -280,5 +296,11 @@ public class SearchResultFragment extends BaseFragment
                 }
             }
         };
+    }
+
+
+    public String getKeyword()
+    {
+        return keyword;
     }
 }

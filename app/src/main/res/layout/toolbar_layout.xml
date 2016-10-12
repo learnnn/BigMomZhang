@@ -1,26 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.AppBarLayout
-    android:id="@+id/appbar"
+<android.support.design.widget.CoordinatorLayout
+    android:id="@+id/main_content"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+    android:layout_height="match_parent">
 
-    <FrameLayout
-        android:id="@+id/toolbar_container"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbar"
+        android:focusableInTouchMode="true"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorPrimary"/>
+            android:background="?attr/colorPrimary"
+            app:layout_scrollFlags="scroll|enterAlways|snap"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
-        <com.miguelcatalan.materialsearchview.MaterialSearchView
-            android:id="@+id/search_view"
-            style="@style/MaterialSearchViewStyle"
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tablayout"
+            app:tabMode="scrollable"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
-    </FrameLayout>
-</android.support.design.widget.AppBarLayout>
+
+
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        app:elevation="6dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        app:layout_behavior="com.libtop.bigmomzhang.widget.ScrollAwareFABBehavior"
+        android:src="@drawable/ic_suggestion"/>
+
+</android.support.design.widget.CoordinatorLayout>

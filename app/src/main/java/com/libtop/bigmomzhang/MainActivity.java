@@ -1,25 +1,28 @@
 package com.libtop.bigmomzhang;
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.flyco.tablayout.SlidingTabLayout;
 import com.libtop.bigmomzhang.adapter.SlideViewPagerAdapter;
-import com.libtop.bigmomzhang.utils.LogUtil;
-import com.miguelcatalan.materialsearchview.MaterialSearchView;
+import com.libtop.bigmomzhang.utils.SharedPrefsStrListUtil;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -28,22 +31,23 @@ import butterknife.ButterKnife;
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener
 {
 
-    @Bind(R.id.activity_main)
-    LinearLayout activityMain;
+//    @Bind(R.id.activity_main)
+//    LinearLayout activityMain;
     @Bind(R.id.toolbar)
     Toolbar toolbar;
-    @Bind(R.id.search_view)
-    MaterialSearchView searchView;
+//    @Bind(R.id.search_view)
+//    MaterialSearchView searchView;
     @Bind(R.id.tablayout)
-    SlidingTabLayout tablayout;
+    TabLayout tablayout;
     @Bind(R.id.viewpager)
     ViewPager mPager;
 
+    private SearchView searchView;
 
     private long mLastBackPress = 0;
 
-        private final String[] mTitles = {
-               "", "笔记本","游戏本","超级本","电磁炉","电视架","电视", "手机"
+        private String[] mTitles = {
+               "笔记本","游戏本","超级本","冰箱","电磁炉","电视架","电视", "手机","happy","710s"
         };
         private ArrayList<Fragment> mFragments = new ArrayList<>();
 
@@ -65,64 +69,102 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        getMenuInflater().inflate(R.menu.menu_search, menu);
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_search, menu);
 
-        MenuItem item = menu.findItem(R.id.action_search);
-        searchView.setMenuItem(item);
+        MenuItem searchItem = menu.findItem(R.id.action_search);
 
-        return true;
+        SearchManager searchManager = (SearchManager) MainActivity.this.getSystemService(Context.SEARCH_SERVICE);
+
+        searchView = (SearchView) searchItem.getActionView();
+
+        if (searchItem != null) {
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    // Toast like print
+                    Toast.makeText(MainActivity.this,query,Toast.LENGTH_SHORT).show();
+//                    TabLayout tab = new TabLayout(MainActivity.this);
+//                    tab.addTab(tab.newTab().setTag(query),0,true);
+
+                    tablayout.addTab(tablayout.newTab().setTag(query));
+                    mAdapter.addTag(query);
+                    //                    tablayout.addNewTab(query);
+//                    toolbar.setTitle(query);
+                    mPager.setCurrentItem(0);
+                    //去除焦点，防止执行两次搜索
+                    searchView.clearFocus();
+                    //清空搜索输入字符，防止执行两次搜索
+                    searchView.setIconified(true);
+                    return false;
+                }
+                @Override
+                public boolean onQueryTextChange(String s) {
+                    // UserFeedback.show( "SearchOnQueryTextChanged: " + s);
+                    return false;
+                }
+            });
+        }
+        if (searchView != null) {
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(MainActivity.this.getComponentName()));
+        }
+        return super.onCreateOptionsMenu(menu);
     }
 
 
     private void initView()
     {
+        List<String> list =  SharedPrefsStrListUtil.getStrListValue(this,"Titles");
+        if (list!=null && !list.isEmpty())
+            mTitles = list.toArray(mTitles);
         mAdapter = new SlideViewPagerAdapter(getSupportFragmentManager(),mTitles);
         mPager.setAdapter(mAdapter);
         setSupportActionBar(toolbar);
         toolbar.setTitleTextColor(Color.WHITE);
-        tablayout.setViewPager(mPager, mTitles);
+        tablayout.setupWithViewPager(mPager);
+//        tablayout.setViewPager(mPager, mTitles);
 
-        searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener()
-        {
-            @Override
-            public boolean onQueryTextSubmit(String query)
-            {
-                //Do some magic
+//        searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener()
+//        {
+//            @Override
+//            public boolean onQueryTextSubmit(String query)
+//            {
+//                //Do some magic
 //                keyword = query;
 //                requestData(true);
-                mAdapter.addTag(query);
-                tablayout.addNewTab(query);
-                toolbar.setTitle(query);
-                mPager.setCurrentItem(0);
-                LogUtil.w(query);
-                return false;
-            }
+//                mAdapter.addTag(query);
+//                tablayout.addNewTab(query);
+//                toolbar.setTitle(query);
+//                mPager.setCurrentItem(0);
+//                LogUtil.w(query);
+//                return false;
+//            }
 
 
-            @Override
-            public boolean onQueryTextChange(String newText)
-            {
-                //Do some magic
-                return false;
-            }
-        });
-        searchView.setVoiceSearch(false);
-
-        searchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener()
-        {
-            @Override
-            public void onSearchViewShown()
-            {
-                //Do some magic
-            }
-
-
-            @Override
-            public void onSearchViewClosed()
-            {
-                //Do some magic
-            }
-        });
+//            @Override
+//            public boolean onQueryTextChange(String newText)
+//            {
+//                //Do some magic
+//                return false;
+//            }
+//        });
+//        searchView.setVoiceSearch(false);
+//
+//        searchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener()
+//        {
+//            @Override
+//            public void onSearchViewShown()
+//            {
+//                //Do some magic
+//            }
+//
+//
+//            @Override
+//            public void onSearchViewClosed()
+//            {
+//                //Do some magic
+//            }
+//        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -156,6 +198,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             mLastBackPress = tempTime;
         }
 
+    }
+
+
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+        searchView.clearFocus();
     }
 
 
