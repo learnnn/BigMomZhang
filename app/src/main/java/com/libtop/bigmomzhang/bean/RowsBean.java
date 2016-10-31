@@ -44,9 +44,9 @@ public   class RowsBean
 
     public int getWorthy()
     {
-        int all = getArticle_unworthy()+getArticle_unworthy();
+        int all = getArticle_worthy()+getArticle_unworthy();
         if (all>0){
-            return (int) (getArticle_worthy() / (float) (getArticle_worthy() + getArticle_unworthy()) * 100);
+            return (int) (getArticle_worthy() / (float) all * 100);
         }else {
             return 0;
         }

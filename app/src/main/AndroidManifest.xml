@@ -22,6 +22,7 @@
         </activity>
 
         <activity android:name=".ItemDetailActivity" />
+        <activity android:name=".CommentActivity" />
     </application>
 
 </manifest>

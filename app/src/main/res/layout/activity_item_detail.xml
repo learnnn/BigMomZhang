@@ -40,6 +40,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_toLeftOf="@+id/tv_time"
+                    android:textIsSelectable="true"
                     android:ellipsize="end"
                     android:lines="1"
                     android:text="@string/mall1"
@@ -51,6 +52,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
+                    android:textIsSelectable="true"
                     android:lines="1"
                     android:text=" | 1分钟前"
                     android:textColor="@color/color888"
@@ -62,6 +64,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15.0dip"
+                android:textIsSelectable="true"
                 android:ellipsize="end"
                 android:lineSpacingExtra="6.0dip"
                 android:textColor="@color/color333"
@@ -73,6 +76,7 @@
                 android:layout_marginBottom="@dimen/padding_normal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textIsSelectable="true"
                 android:ellipsize="end"
                 android:textColor="@color/red"
                 android:textSize="14.0dip"/>
@@ -81,6 +85,7 @@
                 android:id="@+id/tv_desc"
                 android:layout_marginTop="@dimen/padding_normal"
                 android:layout_marginBottom="@dimen/padding_normal"
+                android:textIsSelectable="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 
@@ -112,14 +117,35 @@
 
             </LinearLayout>
 
-            <Button
-                android:id="@+id/btn_go_url"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/activity_horizontal_margin"
-                android:layout_gravity="bottom"
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_marginBottom="60dp"
                 android:layout_marginTop="@dimen/activity_horizontal_margin"
-                android:text="直达链接"/>
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/btn_comment"
+                    android:text="评论"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <Button
+                    android:id="@+id/btn_copy"
+                    android:text="复制链接"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <Button
+                    android:id="@+id/btn_go_url"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:text="直达链接"/>
+
+            </LinearLayout>
+
 
         </LinearLayout>
     </ScrollView>

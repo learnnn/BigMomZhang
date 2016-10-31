@@ -36,7 +36,6 @@ import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Func1;
-import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 
 
@@ -55,6 +54,12 @@ public class SearchResultFragment extends BaseFragment
     private BigMonAdapter bigMonAdapter;
 
     private List<RowsBean> lists = new ArrayList<>();
+
+
+    //最少值得比率，最高100，最低0
+    private final int LIMIT_GOOD = 80;
+    //最少评论数
+    private final int LIMIT_COMMENT = 5;
 
     private final int ONE_PAGE_SIZE = 20;
     private final int PRELOAD_SIZE = 5;
@@ -142,10 +147,10 @@ public class SearchResultFragment extends BaseFragment
             public void onClick(View v, RowsBean rowsBean)
             {
                 Intent intent = new Intent(getContext(),ItemDetailActivity.class);
-                intent.putExtra("channel_id",rowsBean.getArticle_channel_id());
-                intent.putExtra("link_type",rowsBean.getRedirect_data().link_type);
+                intent.putExtra(ItemDetailActivity.CHANNEL_ID,rowsBean.getArticle_channel_id());
+                intent.putExtra(ItemDetailActivity.LINK_TYPE,rowsBean.getRedirect_data().link_type);
                 intent.putExtra("sub_type",rowsBean.getRedirect_data().sub_type);
-                intent.putExtra("link_val",rowsBean.getRedirect_data().link_val);
+                intent.putExtra(ItemDetailActivity.LINK_VAL,rowsBean.getRedirect_data().link_val);
                 startActivity(intent);
             }
         });
@@ -196,7 +201,7 @@ public class SearchResultFragment extends BaseFragment
             {
                 if (isFilter)
                 {
-                    return rowsBean.getWorthy() > 80;
+                    return rowsBean.getWorthy() > LIMIT_GOOD && Integer.parseInt(rowsBean.getArticle_comment()) > LIMIT_COMMENT;
                 }
                 else
                 {
@@ -204,14 +209,15 @@ public class SearchResultFragment extends BaseFragment
                 }
             }
         })
-                .toSortedList(new Func2<RowsBean, RowsBean, Integer>()
-                {
-                    @Override
-                    public Integer call(RowsBean rowsBean, RowsBean rowsBean2)
-                    {
-                        return rowsBean2.getWorthy() - rowsBean.getWorthy();
-                    }
-                })
+                .toList()
+//                .toSortedList(new Func2<RowsBean, RowsBean, Integer>()
+//                {
+//                    @Override
+//                    public Integer call(RowsBean rowsBean, RowsBean rowsBean2)
+//                    {
+//                        return rowsBean2.getWorthy() - rowsBean.getWorthy();
+//                    }
+//                })
                 .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).doAfterTerminate(new Action0()
                 {
                     @Override

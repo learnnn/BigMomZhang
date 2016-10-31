@@ -1,5 +1,7 @@
 package com.libtop.bigmomzhang;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -24,6 +26,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -41,6 +45,10 @@ import rx.schedulers.Schedulers;
 
 public class ItemDetailActivity extends BaseActivity
 {
+    public static final String CHANNEL_ID = "channel_id";
+    public static final String LINK_VAL = "link_type";
+    public static final String LINK_TYPE = "link_val";
+
     @Bind(R.id.img_detail_photo)
     ImageView imgDetailPhoto;
     @Bind(R.id.tv_detail_mall)
@@ -61,8 +69,13 @@ public class ItemDetailActivity extends BaseActivity
     LinearLayout llOrder;
 
     private String url;
-    private String channelId,linkVal;
+    private String channelId, linkVal;
     private Context context;
+    private String arcticle_content;
+
+    private String articleId;
+    private String articleType;
+
 
 
     @Override
@@ -82,8 +95,9 @@ public class ItemDetailActivity extends BaseActivity
     {
         context = this;
         Intent intent = getIntent();
-        channelId = intent.getStringExtra("channel_id");
-        linkVal = intent.getStringExtra("link_val");
+        channelId = intent.getStringExtra(CHANNEL_ID);
+        linkVal = intent.getStringExtra(LINK_VAL);
+        articleType = intent.getStringExtra(LINK_TYPE);
     }
 
 
@@ -103,7 +117,7 @@ public class ItemDetailActivity extends BaseActivity
         params.put("s", "A7IepH35JcdbNwexZRT0dAaTrg3RrElV");
         params.put("v", "320");
         params.put("weixin", 0);
-        HttpRequest.getBigMonApi().getDetial( linkVal, MapUtil.mapObject2String(params)).concatMap(new Func1<DetailBean, Observable<DetailBean.ResultBean>>()
+        HttpRequest.getBigMonApi().getDetial(linkVal, MapUtil.mapObject2String(params)).concatMap(new Func1<DetailBean, Observable<DetailBean.ResultBean>>()
         {
             @Override
             public Observable<DetailBean.ResultBean> call(DetailBean detailBean)
@@ -130,17 +144,16 @@ public class ItemDetailActivity extends BaseActivity
             @Override
             public void onNext(DetailBean.ResultBean resultBean)
             {
+                arcticle_content = resultBean.getArticle_content();
+                articleId = resultBean.getArticle_id();
                 ImageLoadUtil.LoadImage(context, resultBean.getArticle_pic(), imgDetailPhoto);
                 tvDetailMall.setText(resultBean.getArticle_mall());
-                tvDetailTime.setText(" | "+resultBean.getRedirect_data());
+                tvDetailTime.setText(" | " + resultBean.getArticle_format_date());
                 tvDetailTitle.setText(resultBean.getArticle_title());
                 tvDetailPrice.setText(resultBean.getArticle_price());
                 tvDesc.setMovementMethod(LinkMovementMethod.getInstance());
-                tvDesc.setText(Html.fromHtml(resultBean.getProduct_intro()+"\n"+resultBean.getArticle_content()+"\n"+resultBean.getArticle_bl_reason()
-                        ,new URLImageParser(tvDesc,context.getResources(), Picasso.with(context))
-                        ,null));
-                if (resultBean.article_order_screenshot != null
-                       && !resultBean.article_order_screenshot.isEmpty() && !StringUtils.isEmpty(resultBean.article_order_screenshot.get(0).pic))
+                tvDesc.setText(Html.fromHtml(resultBean.getProduct_intro() + "\n" + resultBean.getArticle_content() + "\n" + resultBean.getArticle_bl_reason(), new URLImageParser(tvDesc, context.getResources(), Picasso.with(context)), null));
+                if (resultBean.article_order_screenshot != null && !resultBean.article_order_screenshot.isEmpty() && !StringUtils.isEmpty(resultBean.article_order_screenshot.get(0).pic))
                 {
                     ImageLoadUtil.LoadImage(context, resultBean.article_order_screenshot.get(0).pic, imgOrder);
                 }
@@ -168,16 +181,6 @@ public class ItemDetailActivity extends BaseActivity
     }
 
 
-    @OnClick(R.id.btn_go_url)
-    public void onClick()
-    {
-        if (!TextUtils.isEmpty(url)){
-            Uri uri = Uri.parse(url);
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            startActivity(intent);
-        }
-
-    }
 
 
     @Override
@@ -190,5 +193,95 @@ public class ItemDetailActivity extends BaseActivity
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @OnClick({R.id.btn_comment,R.id.btn_copy, R.id.btn_go_url})
+    public void onClick(View view)
+    {
+        switch (view.getId())
+        {
+            case R.id.btn_comment:
+                commentClick();
+                break;
+            case R.id.btn_copy:
+                copyClick();
+                break;
+            case R.id.btn_go_url:
+                goUrlClick();
+                break;
+        }
+    }
+
+
+    private void commentClick()
+    {
+
+//        if (!StringUtils.isEmpty(arcticle_content)){
+//            String type = getType(arcticle_content);
+            if (!StringUtils.isEmpty(articleId)
+                    || !StringUtils.isEmpty(articleType)){
+                Intent intent = new Intent(context,CommentActivity.class);
+                intent.putExtra(CommentActivity.ARTICLE_ID,articleId);
+                intent.putExtra(CommentActivity.TYPE,articleType);
+                startActivity(intent);
+            }
+//        }
+    }
+
+    private String getArcticle(String input){
+        String pattern = "gtm_id=\\\"(\\w+)";
+        String afterFilter = getStringAfterFilter(input,pattern);
+        if (!StringUtils.isEmpty(afterFilter)){
+            return afterFilter.replace("gtm_id=\"","");
+        }else {
+            return "";
+        }
+    }
+
+    private String getType(String input){
+        String pattern = "gtm_channel_name=\\\"(\\w+)";
+        String afterFilter = getStringAfterFilter(input,pattern);
+        if (!StringUtils.isEmpty(afterFilter)){
+            return afterFilter.replace("gtm_channel_name=\"","");
+        }else {
+            return "";
+        }
+    }
+
+    private String getStringAfterFilter(String input,String pattern){
+        // 创建 Pattern 对象
+        Pattern r = Pattern.compile(pattern);
+        // 现在创建 matcher 对象
+        Matcher m = r.matcher(input);
+        if (m.find( )) {
+            if (m.groupCount()>0){
+                LogUtil.w("Found value: " + m.group(0) );
+                return m.group(0);
+            }else {
+                return "";
+            }
+        } else {
+            LogUtil.w("NO MATCH");
+            return "";
+        }
+    }
+
+
+    private void copyClick()
+    {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("url",url);
+        clipboard.setPrimaryClip(clip);
+    }
+
+
+    private void goUrlClick()
+    {
+        if (!TextUtils.isEmpty(url))
+        {
+            Uri uri = Uri.parse(url);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
+        }
     }
 }

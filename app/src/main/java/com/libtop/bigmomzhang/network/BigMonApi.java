@@ -1,5 +1,6 @@
 package com.libtop.bigmomzhang.network;
 
+import com.libtop.bigmomzhang.bean.CommentBean;
 import com.libtop.bigmomzhang.bean.DetailBean;
 import com.libtop.bigmomzhang.bean.SearchBean;
 
@@ -27,5 +28,8 @@ public interface BigMonApi
     @Headers("Cache-Control: public, max-age=3600")
     @GET("v2/youhui/articles/{value}")
     Observable<DetailBean> getDetial(@Path("value") String value, @QueryMap Map<String,String> options);
+    @Headers("Cache-Control: public, max-age=3600")
+    @GET("v1/comments")
+    Observable<CommentBean> getComment(@QueryMap Map<String,String> options);
 
 }
