@@ -18,7 +18,7 @@ import com.libtop.bigmomzhang.func.OnRVItemClickListener;
 
 import java.util.List;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
@@ -96,29 +96,29 @@ public class BigMonAdapter extends RecyclerView.Adapter<BigMonAdapter.ViewHolder
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
 
-        @Bind(R.id.iv_pic)
+        @BindView(R.id.iv_pic)
         ImageView ivPic;
-        @Bind(R.id.tv_tag)
+        @BindView(R.id.tv_tag)
         TextView tvTag;
-        @Bind(R.id.tv_title)
+        @BindView(R.id.tv_title)
         TextView tvTitle;
-        @Bind(R.id.tv_price)
+        @BindView(R.id.tv_price)
         TextView tvPrice;
-        @Bind(R.id.ly_titleprice)
+        @BindView(R.id.ly_titleprice)
         LinearLayout lyTitleprice;
-        @Bind(R.id.tv_mall)
+        @BindView(R.id.tv_mall)
         TextView tvMall;
-        @Bind(R.id.tv_time)
+        @BindView(R.id.tv_time)
         TextView tvTime;
-        @Bind(R.id.rl_mall_time)
+        @BindView(R.id.rl_mall_time)
         RelativeLayout rlMallTime;
-        @Bind(R.id.tv_comment)
+        @BindView(R.id.tv_comment)
         TextView tvComment;
-        @Bind(R.id.tv_zhi)
+        @BindView(R.id.tv_zhi)
         TextView tvZhi;
-        @Bind(R.id.rl_comment_zhi)
+        @BindView(R.id.rl_comment_zhi)
         LinearLayout rlCommentZhi;
-        @Bind(R.id.rl_bottom_show)
+        @BindView(R.id.rl_bottom_show)
         RelativeLayout rlBottomShow;
 
 

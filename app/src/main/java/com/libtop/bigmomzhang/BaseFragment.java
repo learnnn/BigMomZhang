@@ -5,7 +5,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.view.View;
 
-import rx.Subscription;
+import org.reactivestreams.Subscription;
 
 
 /**
@@ -32,9 +32,9 @@ public class BaseFragment extends Fragment
 
     protected void unsubscribe()
     {
-        if (subscription != null && !subscription.isUnsubscribed())
+        if (subscription != null )
         {
-            subscription.unsubscribe();
+            subscription.cancel();
         }
     }
 

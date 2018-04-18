@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -17,18 +16,19 @@ import com.libtop.bigmomzhang.bean.CommentRowsBean;
 import com.libtop.bigmomzhang.network.HttpRequest;
 import com.libtop.bigmomzhang.utils.LogUtil;
 import com.libtop.bigmomzhang.utils.MapUtil;
+import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
-import rx.Observer;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.schedulers.Schedulers;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Action;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 import static com.libtop.bigmomzhang.App.getContext;
 
@@ -42,11 +42,11 @@ public class CommentActivity extends BaseActivity
 
     public static final String ARTICLE_ID = "article_id";
     public static final String TYPE = "articleType";
-    @Bind(R.id.rcv_comment)
+    @BindView(R.id.rcv_comment)
     RecyclerView rcvComment;
-    @Bind(R.id.swipeRefreshLayout)
+    @BindView(R.id.swipeRefreshLayout)
     SwipeRefreshLayout swipeRefreshLayout;
-    @Bind(R.id.toolbar_detail)
+    @BindView(R.id.toolbar_detail)
     Toolbar toolbarDetail;
 
     private Context context;
@@ -84,9 +84,11 @@ public class CommentActivity extends BaseActivity
         rcvComment.setLayoutManager(layoutManager);
         adapter = new CommentAdapter(getContext(), lists);
         rcvComment.setAdapter(adapter);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rcvComment.getContext(),
-                layoutManager.getOrientation());
-        rcvComment.addItemDecoration(dividerItemDecoration);
+//        RecyclerView.ItemDecoration dividerItemDecoration = new RecyclerView.ItemDecoration(rcvComment.getContext(),
+//                layoutManager.getOrientation()) {
+//        };
+//        rcvComment.addItemDecoration(dividerItemDecoration);
+        rcvComment.addItemDecoration(new HorizontalDividerItemDecoration.Builder(this).build());
         rcvComment.addOnScrollListener(getOnBottomListener(layoutManager));
     }
 
@@ -157,43 +159,35 @@ public class CommentActivity extends BaseActivity
         HttpRequest.getBigMonApi().getComment(MapUtil.mapObject2String(params))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doAfterTerminate(new Action0()
-                {
+                .doAfterTerminate(new Action() {
                     @Override
-                    public void call()
-                    {
+                    public void run() throws Exception {
                         swipeRefreshLayout.setRefreshing(false);
                     }
                 })
-                .subscribe(new Observer<CommentBean>()
-        {
-            @Override
-            public void onCompleted()
-            {
+                .subscribe(new DisposableObserver<CommentBean>() {
+                    @Override
+                    public void onNext(CommentBean commentBean) {
+                        LogUtil.w(commentBean.toString());
+                        if (clean)
+                        {
+                            lists.clear();
+                            hasMore = true;
+                        }
+                        lists.addAll(commentBean.data.rows);
+                        adapter.notifyDataSetChanged();
+                    }
 
-            }
+                    @Override
+                    public void onError(Throwable e) {
 
+                    }
 
-            @Override
-            public void onError(Throwable e)
-            {
-                LogUtil.w(e.toString());
-            }
+                    @Override
+                    public void onComplete() {
 
-
-            @Override
-            public void onNext(CommentBean commentBean)
-            {
-                LogUtil.w(commentBean.toString());
-                if (clean)
-                {
-                    lists.clear();
-                    hasMore = true;
-                }
-                lists.addAll(commentBean.data.rows);
-                adapter.notifyDataSetChanged();
-            }
-        });
+                    }
+                });
     }
 
 

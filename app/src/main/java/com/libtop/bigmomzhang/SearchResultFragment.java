@@ -28,15 +28,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import rx.Observable;
-import rx.Observer;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Function;
+import io.reactivex.functions.Predicate;
+import io.reactivex.observers.DisposableSingleObserver;
+import io.reactivex.schedulers.Schedulers;
 
 
 /**
@@ -46,9 +48,9 @@ import rx.schedulers.Schedulers;
 public class SearchResultFragment extends BaseFragment
 {
 
-    @Bind(R.id.rcv_search_list)
+    @BindView(R.id.rcv_search_list)
     RecyclerView rcvSearchList;
-    @Bind(R.id.swipeRefreshLayout)
+    @BindView(R.id.swipeRefreshLayout)
     SwipeRefreshLayout swipeRefreshLayout;
 
     private BigMonAdapter bigMonAdapter;
@@ -67,6 +69,8 @@ public class SearchResultFragment extends BaseFragment
     //加载下一页的个数
     private int offset = 0;
     private String keyword = "";
+
+    private int count = 0;
 
     private boolean isFilter = true;
     private boolean hasMore = true;
@@ -106,6 +110,7 @@ public class SearchResultFragment extends BaseFragment
             @Override
             public void onRefresh()
             {
+                count = 0;
                 requestData(true);
             }
         });
@@ -119,7 +124,7 @@ public class SearchResultFragment extends BaseFragment
     public void onDestroyView()
     {
         super.onDestroyView();
-        ButterKnife.unbind(this);
+//        ButterKnife.unbind(this);
     }
 
     private void initRecyclerView()
@@ -178,38 +183,44 @@ public class SearchResultFragment extends BaseFragment
         params.put("s", "A7IepH35JcdbNwexZRT0dAaTrg3RrElV");
         params.put("v", "320");
         params.put("weixin", 0);
-        subscription = HttpRequest.getBigMonApi().getSearchList("v1", "list", MapUtil.mapObject2String(params)).concatMap(new Func1<SearchBean, Observable<List<RowsBean>>>()
-        {
-            @Override
-            public Observable<List<RowsBean>> call(SearchBean searchBean)
-            {
-                return Observable.just(searchBean.data.rows);
-            }
-        }).concatMap(new Func1<List<RowsBean>, Observable<RowsBean>>()
-        {
-            @Override
-            public Observable<RowsBean> call(List<RowsBean> rowsBeen)
-            {
-                if (rowsBeen.isEmpty())
-                    hasMore = false;
-                return Observable.from(rowsBeen);
-            }
-        }).filter(new Func1<RowsBean, Boolean>()
-        {
-            @Override
-            public Boolean call(RowsBean rowsBean)
-            {
-                if (isFilter)
-                {
-                    return rowsBean.getWorthy() > LIMIT_GOOD && Integer.parseInt(rowsBean.getArticle_comment()) > LIMIT_COMMENT;
-                }
-                else
-                {
-                    return true;
-                }
-            }
-        })
+//        subscription =
+        HttpRequest.getBigMonApi().getSearchList("v1", "list", MapUtil.mapObject2String(params))
+                .concatMap(new Function<SearchBean, ObservableSource<List<RowsBean>>>() {
+                    @Override
+                    public ObservableSource<List<RowsBean>> apply(SearchBean searchBean) throws Exception {
+                        return Observable.just(searchBean.data.rows);
+                    }
+                })
+                .concatMap(new Function<List<RowsBean>, ObservableSource<RowsBean>>() {
+                    @Override
+                    public ObservableSource<RowsBean> apply(List<RowsBean> rowsBeans) throws Exception {
+                        if (rowsBeans.isEmpty())
+                            hasMore = false;
+                        return Observable.fromIterable(rowsBeans);
+                    }
+                })
+                .filter(new Predicate<RowsBean>() {
+                    @Override
+                    public boolean test(RowsBean rowsBean) throws Exception {
+                        if (isFilter)
+                        {
+                            return rowsBean.getWorthy() > LIMIT_GOOD && Integer.parseInt(rowsBean.getArticle_comment()) > LIMIT_COMMENT;
+                        }
+                        else
+                        {
+                            return true;
+                        }
+                    }
+                })
                 .toList()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doAfterTerminate(new Action() {
+                    @Override
+                    public void run() throws Exception {
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
+                })
 //                .toSortedList(new Func2<RowsBean, RowsBean, Integer>()
 //                {
 //                    @Override
@@ -218,38 +229,25 @@ public class SearchResultFragment extends BaseFragment
 //                        return rowsBean2.getWorthy() - rowsBean.getWorthy();
 //                    }
 //                })
-                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).doAfterTerminate(new Action0()
-                {
+                .subscribe(new DisposableSingleObserver<List<RowsBean>>() {
                     @Override
-                    public void call()
-                    {
-                        swipeRefreshLayout.setRefreshing(false);
-                    }
-                }).subscribe(new Observer<List<RowsBean>>()
-                {
-                    @Override
-                    public void onCompleted()
-                    {
-
-                    }
-
-
-                    @Override
-                    public void onError(Throwable e)
-                    {
-
-                    }
-
-
-                    @Override
-                    public void onNext(List<RowsBean> rowsBeens)
-                    {
+                    public void onSuccess(List<RowsBean> rowsBeens){
+                        count++;
                         if (clean){
                             lists.clear();
                             hasMore = true;
                         }
                         lists.addAll(rowsBeens);
                         bigMonAdapter.notifyDataSetChanged();
+                        if (lists.size() < 30 && count < 60){
+                            offset += ONE_PAGE_SIZE;
+                            requestData(false);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
                     }
                 });
     }

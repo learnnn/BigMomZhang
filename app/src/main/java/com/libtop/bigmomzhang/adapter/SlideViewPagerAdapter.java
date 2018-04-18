@@ -21,7 +21,7 @@ public class SlideViewPagerAdapter extends FragmentStatePagerAdapter
 {
 
     private List<String> mTitles = new ArrayList<>();
-    private final int MAX_TAB_SIZE = 9;
+    private final int MAX_TAB_SIZE = 12;
 
     public SlideViewPagerAdapter(FragmentManager fm,String[] strings) {
         super(fm);
@@ -30,12 +30,24 @@ public class SlideViewPagerAdapter extends FragmentStatePagerAdapter
 
     public void addTag(String title){
         mTitles.add(0,title);
-        if (mTitles.size()>MAX_TAB_SIZE){
-            mTitles = mTitles.subList(0,MAX_TAB_SIZE);
-            mTitles.add("");
-            SharedPrefsStrListUtil.putStrListValue(App.getContext(),"Titles",mTitles);
+        if (mTitles.contains("")){
+            mTitles.remove("");
         }
+        mTitles.add(1,"");
+        if (mTitles.size()>MAX_TAB_SIZE){
+            mTitles.remove(mTitles.size()-1);
+//            mTitles = mTitles.subList(0,MAX_TAB_SIZE);
+        }
+        SharedPrefsStrListUtil.putStrListValue(App.getContext(),"Titles",mTitles);
         notifyDataSetChanged();
+    }
+
+    public void removeTag(String title){
+        if (mTitles.size() > 0){
+            mTitles.remove(title);
+            SharedPrefsStrListUtil.putStrListValue(App.getContext(),"Titles",mTitles);
+            notifyDataSetChanged();
+        }
     }
 
     public int getItemPosition(Object item) {
@@ -54,7 +66,7 @@ public class SlideViewPagerAdapter extends FragmentStatePagerAdapter
 
     @Override
     public CharSequence getPageTitle(int position) {
-        if (mTitles.get(position).equals("")){
+        if (mTitles.get(position) != null && mTitles.get(position).equals("")){
             return "随便逛逛";
         }else {
             return mTitles.get(position);

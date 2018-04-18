@@ -17,6 +17,7 @@ build/
 #Built application files
 *.apk
 *.ap_
+app/release/
 
 #Files for the Dalvik VM
 *.dex

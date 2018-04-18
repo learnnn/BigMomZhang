@@ -29,14 +29,15 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import rx.Observable;
-import rx.Observer;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Function;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 
 /**
@@ -49,23 +50,23 @@ public class ItemDetailActivity extends BaseActivity
     public static final String LINK_VAL = "link_type";
     public static final String LINK_TYPE = "link_val";
 
-    @Bind(R.id.img_detail_photo)
+    @BindView(R.id.img_detail_photo)
     ImageView imgDetailPhoto;
-    @Bind(R.id.tv_detail_mall)
+    @BindView(R.id.tv_detail_mall)
     TextView tvDetailMall;
-    @Bind(R.id.tv_detail_time)
+    @BindView(R.id.tv_detail_time)
     TextView tvDetailTime;
-    @Bind(R.id.rl_mall_time)
+    @BindView(R.id.rl_mall_time)
     LinearLayout rlMallTime;
-    @Bind(R.id.tv_detail_title)
+    @BindView(R.id.tv_detail_title)
     TextView tvDetailTitle;
-    @Bind(R.id.tv_detail_price)
+    @BindView(R.id.tv_detail_price)
     TextView tvDetailPrice;
-    @Bind(R.id.tv_desc)
+    @BindView(R.id.tv_desc)
     TextView tvDesc;
-    @Bind(R.id.img_order)
+    @BindView(R.id.img_order)
     ImageView imgOrder;
-    @Bind(R.id.ll_order)
+    @BindView(R.id.ll_order)
     LinearLayout llOrder;
 
     private String url;
@@ -117,54 +118,48 @@ public class ItemDetailActivity extends BaseActivity
         params.put("s", "A7IepH35JcdbNwexZRT0dAaTrg3RrElV");
         params.put("v", "320");
         params.put("weixin", 0);
-        HttpRequest.getBigMonApi().getDetial(linkVal, MapUtil.mapObject2String(params)).concatMap(new Func1<DetailBean, Observable<DetailBean.ResultBean>>()
-        {
-            @Override
-            public Observable<DetailBean.ResultBean> call(DetailBean detailBean)
-            {
-                return Observable.just(detailBean.data);
-            }
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<DetailBean.ResultBean>()
-        {
-            @Override
-            public void onCompleted()
-            {
+        HttpRequest.getBigMonApi().getDetial(linkVal, MapUtil.mapObject2String(params))
+                .concatMap(new Function<DetailBean, ObservableSource<DetailBean.ResultBean>>() {
+                    @Override
+                    public ObservableSource<DetailBean.ResultBean> apply(DetailBean detailBean) throws Exception {
+                        return Observable.just(detailBean.data);
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new DisposableObserver<DetailBean.ResultBean>() {
+                    @Override
+                    public void onNext(DetailBean.ResultBean resultBean) {
+                        arcticle_content = resultBean.getArticle_content();
+                        articleId = resultBean.getArticle_id();
+                        ImageLoadUtil.LoadImage(context, resultBean.getArticle_pic(), imgDetailPhoto);
+                        tvDetailMall.setText(resultBean.getArticle_mall());
+                        tvDetailTime.setText(" | " + resultBean.getArticle_format_date());
+                        tvDetailTitle.setText(resultBean.getArticle_title());
+                        tvDetailPrice.setText(resultBean.getArticle_price());
+                        tvDesc.setMovementMethod(LinkMovementMethod.getInstance());
+                        tvDesc.setText(Html.fromHtml(resultBean.getProduct_intro() + "\n" + resultBean.getArticle_content() + "\n" + resultBean.getArticle_bl_reason(), new URLImageParser(tvDesc, context.getResources(), Picasso.with(context)), null));
+                        if (resultBean.article_order_screenshot != null && !resultBean.article_order_screenshot.isEmpty() && !StringUtils.isEmpty(resultBean.article_order_screenshot.get(0).pic))
+                        {
+                            ImageLoadUtil.LoadImage(context, resultBean.article_order_screenshot.get(0).pic, imgOrder);
+                        }
+                        else
+                        {
+                            llOrder.setVisibility(View.GONE);
+                        }
+                        url = resultBean.getRedirect_data().link;
+                    }
 
-            }
+                    @Override
+                    public void onError(Throwable e) {
 
+                    }
 
-            @Override
-            public void onError(Throwable e)
-            {
-                LogUtil.w(e.toString());
+                    @Override
+                    public void onComplete() {
 
-            }
-
-
-            @Override
-            public void onNext(DetailBean.ResultBean resultBean)
-            {
-                arcticle_content = resultBean.getArticle_content();
-                articleId = resultBean.getArticle_id();
-                ImageLoadUtil.LoadImage(context, resultBean.getArticle_pic(), imgDetailPhoto);
-                tvDetailMall.setText(resultBean.getArticle_mall());
-                tvDetailTime.setText(" | " + resultBean.getArticle_format_date());
-                tvDetailTitle.setText(resultBean.getArticle_title());
-                tvDetailPrice.setText(resultBean.getArticle_price());
-                tvDesc.setMovementMethod(LinkMovementMethod.getInstance());
-                tvDesc.setText(Html.fromHtml(resultBean.getProduct_intro() + "\n" + resultBean.getArticle_content() + "\n" + resultBean.getArticle_bl_reason(), new URLImageParser(tvDesc, context.getResources(), Picasso.with(context)), null));
-                if (resultBean.article_order_screenshot != null && !resultBean.article_order_screenshot.isEmpty() && !StringUtils.isEmpty(resultBean.article_order_screenshot.get(0).pic))
-                {
-                    ImageLoadUtil.LoadImage(context, resultBean.article_order_screenshot.get(0).pic, imgOrder);
-                }
-                else
-                {
-                    llOrder.setVisibility(View.GONE);
-                }
-                url = resultBean.getRedirect_data().link;
-            }
-        });
-
+                    }
+                });
 
     }
 

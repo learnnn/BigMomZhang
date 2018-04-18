@@ -12,7 +12,7 @@ import com.libtop.bigmomzhang.bean.CommentRowsBean;
 
 import java.util.List;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
@@ -62,7 +62,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
     class ViewHolder extends RecyclerView.ViewHolder
     {
 
-        @Bind(R.id.tv_comment_content)
+        @BindView(R.id.tv_comment_content)
         TextView tvCommentContent;
 
 
