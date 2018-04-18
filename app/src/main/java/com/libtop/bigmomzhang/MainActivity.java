@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -279,6 +280,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         if (id == R.id.nav_camera) {
             // Handle the camera action
+            Intent intent = new Intent(this, SettingActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {

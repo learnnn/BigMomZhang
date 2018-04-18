@@ -22,6 +22,7 @@ import com.libtop.bigmomzhang.func.OnRVItemClickListener;
 import com.libtop.bigmomzhang.network.HttpRequest;
 import com.libtop.bigmomzhang.utils.LogUtil;
 import com.libtop.bigmomzhang.utils.MapUtil;
+import com.libtop.bigmomzhang.utils.SharedPrefsStrListUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,9 +60,9 @@ public class SearchResultFragment extends BaseFragment
 
 
     //最少值得比率，最高100，最低0
-    private final int LIMIT_GOOD = 80;
+//    private final int LIMIT_GOOD = 80;
     //最少评论数
-    private final int LIMIT_COMMENT = 5;
+//    private final int LIMIT_COMMENT = 5;
 
     private final int ONE_PAGE_SIZE = 20;
     private final int PRELOAD_SIZE = 5;
@@ -75,6 +76,9 @@ public class SearchResultFragment extends BaseFragment
     private boolean isFilter = true;
     private boolean hasMore = true;
     private InputMethodManager inputManager;
+
+    private int limitGood;
+    private int limitComment;
 
     public static SearchResultFragment getInstance(String title) {
         SearchResultFragment sf = new SearchResultFragment();
@@ -98,7 +102,15 @@ public class SearchResultFragment extends BaseFragment
         super.onViewCreated(view, savedInstanceState);
         initView();
         initRecyclerView();
+        initValue();
         requestData(true);
+    }
+
+    private void initValue() {
+        String zhi = SharedPrefsStrListUtil.getStringValue(App.getContext(),SettingActivity.LOW_ZHI,"80");
+        String discuss = SharedPrefsStrListUtil.getStringValue(App.getContext(),SettingActivity.LOW_DISCUSS,"5");
+        limitGood = Integer.valueOf(zhi);
+        limitComment = Integer.valueOf(discuss);
     }
 
 
@@ -204,7 +216,7 @@ public class SearchResultFragment extends BaseFragment
                     public boolean test(RowsBean rowsBean) throws Exception {
                         if (isFilter)
                         {
-                            return rowsBean.getWorthy() > LIMIT_GOOD && Integer.parseInt(rowsBean.getArticle_comment()) > LIMIT_COMMENT;
+                            return rowsBean.getWorthy() > limitGood && Integer.parseInt(rowsBean.getArticle_comment()) > limitComment;
                         }
                         else
                         {

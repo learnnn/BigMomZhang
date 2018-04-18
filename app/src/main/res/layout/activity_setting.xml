@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_detail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary" />
+
+    <TextView
+        android:text="最低值百分数"
+        android:textColor="@android:color/black"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/til_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/num_zhi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="请输入0-100的数字"
+            android:inputType="number"
+            />
+    </android.support.design.widget.TextInputLayout>
+
+
+    <TextView
+        android:text="最低值评论数"
+        android:textColor="@android:color/black"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/num_discuss"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="请输入大于0的数字"
+            android:inputType="number"
+            />
+    </android.support.design.widget.TextInputLayout>
+
+    <Button
+        android:id="@+id/btn_submit"
+        android:layout_marginTop="30dp"
+        android:text="保存"
+        android:layout_gravity="right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+
+</LinearLayout>

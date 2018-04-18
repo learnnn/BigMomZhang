@@ -40,7 +40,7 @@ public class SharedPrefsStrListUtil {
      * @param key
      * @param value
      */
-    private static void putStringValue(Context context, String key, String value) {
+    public static void putStringValue(Context context, String key, String value) {
         SharedPreferences.Editor sp = context.getSharedPreferences(SETTING, Context.MODE_PRIVATE)
                 .edit();
         sp.putString(key, value);
@@ -95,7 +95,7 @@ public class SharedPrefsStrListUtil {
      *            默认值
      * @return
      */
-    private static String getStringValue(Context context, String key,
+    public static String getStringValue(Context context, String key,
                                          String defValue) {
         SharedPreferences sp = context.getSharedPreferences(SETTING,
                 Context.MODE_PRIVATE);
